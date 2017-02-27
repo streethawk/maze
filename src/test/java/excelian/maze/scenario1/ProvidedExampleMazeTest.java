@@ -2,7 +2,7 @@ package excelian.maze.scenario1;
 
 import excelian.maze.Maze;
 import excelian.maze.MazeTestUtils;
-import excelian.maze.Position;
+import excelian.maze.orientation.Position;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;

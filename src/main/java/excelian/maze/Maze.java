@@ -1,5 +1,8 @@
 package excelian.maze;
 
+import excelian.maze.exception.InvalidMazeException;
+import excelian.maze.orientation.Position;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,7 +38,7 @@ public class Maze {
      */
     private List<List<String>> mazeStructure;
 
-    public Maze(String fileName) throws IOException{
+    public Maze(String fileName) throws IOException, InvalidMazeException{
         this.mazeFile = fileName;
         this.mazeStructure = createMapStructureFromFile(); 
         validateMaze();
@@ -107,7 +110,7 @@ public class Maze {
         return mazeStructure.get(0).size()-1<y;
     }
     
-    private void validateMaze() throws InvalidMazeException{
+    private void validateMaze() throws InvalidMazeException {
         if(mazeStructure.isEmpty()){
             throw new InvalidMazeException(EMPTY_MAZE);
         }

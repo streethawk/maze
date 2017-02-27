@@ -1,5 +1,11 @@
 package excelian.maze;
 
+import excelian.maze.exception.InvalidMazeException;
+import excelian.maze.orientation.Direction;
+import excelian.maze.orientation.MovementOptions;
+import excelian.maze.orientation.Position;
+import excelian.maze.orientation.TurnOptions;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -15,7 +21,7 @@ public class Explorer {
     public static final String INVALID_MAZE = "Invalid/Null Maze Supplied";
     private static final Direction START_DIRECTION = Direction.EAST; //declaring the default traversal direction as Start direction
     private Direction currentDirectionOfTravel; //Explorer always maintains/knows the direction he/she is traveling in
-    private LinkedHashMap<String,String> positionValueDirectionMap; //A temporary map K=[0,0] V=" -EAST" Explorer always maintains a map
+    private LinkedHashMap<String,String> positionValueDirectionMap; //A temporary map K=[0,0] V=" " Explorer always maintains a map
     private List<String> positionValueList; // K=[0,0] V=" " Explorer always maintains a map and holds it as a record of his journey
     private int[] currentPosition;
 
@@ -33,7 +39,14 @@ public class Explorer {
         this.currentDirectionOfTravel = currentDirectionOfTravel;
     }
 
-    public LinkedHashMap<String,String> exploreMaze(Maze maze)  throws IOException{
+    /**
+     * Explore the maze by evaluating next move recursively
+     * @param maze Maze to explore
+     * @return list of [x,y] coordinates showing explorers journey in the maze
+     * @throws IOException
+     * @throws InvalidMazeException
+     */
+    public List<String> exploreMaze(Maze maze)  throws IOException, InvalidMazeException{
         positionValueDirectionMap = newLinkedHashMap();
         positionValueList = newArrayList();
 
@@ -44,24 +57,26 @@ public class Explorer {
         int[] start = locatePosition(maze, String.valueOf(Position.START.getPositionCharacter()));
         int[] finish = locatePosition(maze, String.valueOf(Position.FINISH.getPositionCharacter()));
 
-        positionValueDirectionMap.put(Arrays.toString(start),
-                String.valueOf(Position.START.getPositionCharacter()).concat("-"+getCurrentDirectionOfTravel()));
+        positionValueDirectionMap.put(Arrays.toString(start),String.valueOf(Position.START.getPositionCharacter()));
         positionValueList.add(Arrays.toString(start));
 
         explorePosition(start, maze, finish);
-
-        System.out.println(positionValueDirectionMap.keySet());
-        System.out.println(positionValueList);
-
-        return positionValueDirectionMap;
+        return positionValueList;
     }
 
+    /**
+     * Evaluates the current position and takes the next step accordingly
+     * @param start [x,y] coordinates of the start position depicted by 'S'
+     * @param maze Maze representation
+     * @param finish [x,y] coordinates of the finish position depicted by 'F'
+     */
     private void explorePosition(int[] start, Maze maze, int[] finish){
 
         if(!positionValueDirectionMap.containsKey(Arrays.toString(finish))){
 
             List<MovementOptions> allAllowedMoves = allAllowedMoves(start, maze);
             
+            //hit the dead-end? turn around and trace your steps backwards
             if(allAllowedMoves.isEmpty()){
                 turnaround();
                 allAllowedMoves = allAllowedMoves(start, maze);
@@ -72,11 +87,6 @@ public class Explorer {
             }
             else {
                 for(MovementOptions possibleMove: allAllowedMoves){
-                /*if(positionValueDirectionMap.containsKey(Arrays.toString(start))){
-                    String valueForMove = positionValueDirectionMap.get(Arrays.toString(start));
-                    String directionForMove = valueForMove.substring(valueForMove.indexOf("-")+1);
-                    setCurrentDirectionOfTravel(Direction.valueOf(directionForMove));
-                }*/
                     int[] possibleNextMove = possibleMove.getDirectionCoordinates(start[0],start[1],maze, getCurrentDirectionOfTravel());
                     if(!positionValueDirectionMap.containsKey(Arrays.toString(possibleNextMove))){
                         int[] movePosition = move(possibleMove, start, maze);
@@ -85,18 +95,16 @@ public class Explorer {
 
                 }
             }
-            /*if(allAllowedMoves.isEmpty()){
-                turn(TurnOptions.LEFT);
-                allAllowedMoves = allAllowedMoves(start,maze);
-                if(allAllowedMoves.isEmpty()){
-                    turn(TurnOptions.RIGHT);
-                    allAllowedMoves = allAllowedMoves(start, maze);
-                }
-            }*/
-
-
         }
     }
+
+    /**
+     * Single move taken by explorer, making a note of the move at the same time
+     * @param possibleMove one of the possible moves which can be taken by explorer
+     * @param start [x,y] coordinates of the start position depicted by 'S'
+     * @param maze Maze representation
+     * @return coordinate of the next possible move
+     */
     private int[] move(MovementOptions possibleMove, int[] start, Maze maze) {
         turnIfNeeded(possibleMove); //turn the explorer as indicates by the available Movement Options
 
@@ -104,27 +112,22 @@ public class Explorer {
         String value = maze.getValueAtCoordinate(movePosition[0],movePosition[1]);
         positionValueList.add(Arrays.toString(movePosition));
 
-        //if(!positionValueDirectionMap.containsKey(Arrays.toString(movePosition))){
+        if(!positionValueDirectionMap.containsValue(String.valueOf(Position.FINISH.getPositionCharacter()))){
 
-            if(!positionValueDirectionMap.containsValue(String.valueOf(Position.FINISH.getPositionCharacter()))){
+            //assign the start position as the current position
+            currentPosition = movePosition;
 
-                //assign the start position as the current position
-                currentPosition = movePosition;
-
-                //make an entry of the start position in the map
-                positionValueDirectionMap.put(Arrays.toString(currentPosition), value.concat("-"+getCurrentDirectionOfTravel()));
-                //positionValueMap.put(Arrays.toString(currentPosition), value);
-
-                //explorePosition(currentPosition,maze);
-            }
-
-            
-
-        //}
+            //make an entry of the start position in the map
+            positionValueDirectionMap.put(Arrays.toString(currentPosition), value);
+        }
 
         return currentPosition;
     }
 
+    /**
+     * Turns the explorer in a direction specified ny Turnoptions value (left or right)
+     * @param turnOptions
+     */
     public void turn(TurnOptions turnOptions) {
         if(turnOptions.equals(TurnOptions.LEFT)){
             setCurrentDirectionOfTravel(getCurrentDirectionOfTravel().turnLeft());
@@ -134,6 +137,13 @@ public class Explorer {
 
     }
 
+    /**
+     * Locates the [x,y] coordinate of specified string value in the maze
+     * @param maze
+     * @param positionCharacter
+     * @return
+     * @throws IOException
+     */
     public int[] locatePosition(Maze maze, String positionCharacter) throws IOException{
         int[] start = {0,0};
         if(null!=maze){
@@ -153,6 +163,12 @@ public class Explorer {
         return start;
     }
 
+    /**
+     * List of all possible moves from current position travelling in a direction
+     * @param currentPosition
+     * @param maze
+     * @return List of all possible moves from current position travelling in a direction
+     */
     public List<MovementOptions> allAllowedMoves(int[] currentPosition, Maze maze) {
         List<MovementOptions> allAllowedMoves = newArrayList();
 
@@ -173,7 +189,7 @@ public class Explorer {
             turn(TurnOptions.RIGHT);
         }
     }
-    
+
     private void turnaround(){
         turn(TurnOptions.LEFT);
         turn(TurnOptions.LEFT);

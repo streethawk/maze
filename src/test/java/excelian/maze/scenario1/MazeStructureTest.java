@@ -1,7 +1,7 @@
 package excelian.maze.scenario1;
 
 import excelian.maze.*;
-import org.junit.BeforeClass;
+import excelian.maze.exception.InvalidMazeException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

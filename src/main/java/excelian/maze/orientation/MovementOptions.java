@@ -1,4 +1,6 @@
-package excelian.maze;
+package excelian.maze.orientation;
+
+import excelian.maze.Maze;
 
 /**
  * Enum representing Movement Options for the Explorer

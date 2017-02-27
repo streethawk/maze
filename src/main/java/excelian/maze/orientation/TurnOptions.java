@@ -1,4 +1,4 @@
-package excelian.maze;
+package excelian.maze.orientation;
 
 public enum TurnOptions {
 

@@ -1,4 +1,4 @@
-package excelian.maze;
+package excelian.maze.exception;
 
 public class InvalidMazeException extends RuntimeException {
     

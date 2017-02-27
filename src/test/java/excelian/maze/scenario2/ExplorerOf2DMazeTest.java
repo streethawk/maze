@@ -1,6 +1,10 @@
 package excelian.maze.scenario2;
 
 import excelian.maze.*;
+import excelian.maze.orientation.Direction;
+import excelian.maze.orientation.MovementOptions;
+import excelian.maze.orientation.Position;
+import excelian.maze.orientation.TurnOptions;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
