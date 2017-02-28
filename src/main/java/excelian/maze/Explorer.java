@@ -19,10 +19,10 @@ import static com.google.common.collect.Maps.newLinkedHashMap;
 public class Explorer {
 
     public static final String INVALID_MAZE = "Invalid/Null Maze Supplied";
-    private static final Direction START_DIRECTION = Direction.EAST; //declaring the default traversal direction as Start direction
-    private Direction currentDirectionOfTravel; //Explorer always maintains/knows the direction he/she is traveling in
+    private static final Direction START_DIRECTION = Direction.EAST; 
+    private Direction currentDirectionOfTravel; 
     private LinkedHashMap<String,String> positionValueDirectionMap; //A temporary map K=[0,0] V=" " Explorer always maintains a map
-    private List<String> positionValueList; // K=[0,0] V=" " Explorer always maintains a map and holds it as a record of his journey
+    private List<String> positionValueList; 
     private int[] currentPosition;
 
     public Explorer(){
@@ -33,8 +33,7 @@ public class Explorer {
         return currentDirectionOfTravel;
     }
 
-    //this should not be public as no-one external should be able to set the direction of travel. the direction
-    //can only be changed when explorer turns, so an indirect control
+    
     private void setCurrentDirectionOfTravel(Direction currentDirectionOfTravel) {
         this.currentDirectionOfTravel = currentDirectionOfTravel;
     }
